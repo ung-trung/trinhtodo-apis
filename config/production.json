@@ -1,0 +1,4 @@
+{
+  "mongoURI": "mongodb+srv://ungkientrung:<password>@trinhtodocluster-ug2qh.mongodb.net/test?retryWrites=true&w=majority",
+  "jwtSecret": "secret"
+}
