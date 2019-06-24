@@ -1,4 +1,6 @@
 const express = require('express');
+const cors = require('cors');
+
 const connectDB = require('./config/db');
 const path = require('path');
 
@@ -11,6 +13,19 @@ connectDB();
 //Init Middleware
 
 app.use(express.json());
+
+const whitelist = ['http://localhost:3000', 'https://trinhtodo.netlify.com/'];
+
+const corsOptions = {
+  origin: function(origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+};
+app.use(cors(corsOptions));
 
 //Define Routes
 app.use('/api/users', require('./routes/users'));
