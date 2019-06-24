@@ -14,8 +14,6 @@ connectDB();
 
 app.use(express.json());
 
-app.use(cors());
-
 //Define Routes
 app.use('/api/users', require('./routes/users'));
 app.use('/api/todos', require('./routes/todos'));
