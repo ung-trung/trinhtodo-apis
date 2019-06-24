@@ -14,22 +14,7 @@ connectDB();
 
 app.use(express.json());
 
-const whitelist = [
-  'http://localhost:3000',
-  'https://trinhtodo.netlify.com/',
-  'https://trinhtodo-new-api.herokuapp.com/'
-];
-
-const corsOptions = {
-  origin: function(origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-};
-app.use(cors(corsOptions));
+app.use(cors());
 
 //Define Routes
 app.use('/api/users', require('./routes/users'));
