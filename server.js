@@ -18,7 +18,7 @@ app.use('/api/todos', require('./routes/todos'));
 app.use('/api/auth', require('./routes/auth'));
 
 app.get('/', function(req, res) {
-  res.send('Hello World');
+  res.send('Welcome to Trinhtodo API');
 });
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
