@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { check, validationResult } = require('express-validator/check');
+const { check, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -12,6 +12,7 @@ const User = require('../models/User');
 // @route   GET api/auth
 // @desc    Get logged in a user
 // @access  Private
+// decoded already set localStorage.token to find user object
 router.get('/', auth, async (req, res) => {
   try {
     // @ts-ignore
@@ -25,6 +26,7 @@ router.get('/', auth, async (req, res) => {
 // @route   POST api/auth
 // @desc    Auth user and get token
 // @access  Private
+// check email, password then return a token to be set at localStorage
 router.post(
   '/',
   [
@@ -45,6 +47,7 @@ router.post(
         return res.status(400).json({ msg: 'Invalid Credentials' });
       }
 
+      // @ts-ignore
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
