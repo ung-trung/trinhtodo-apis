@@ -14,7 +14,11 @@ connectDB();
 
 app.use(express.json());
 
-const whitelist = ['http://localhost:3000', 'https://trinhtodo.netlify.com/'];
+const whitelist = [
+  'http://localhost:3000',
+  'https://trinhtodo.netlify.com/',
+  'https://trinhtodo-new-api.herokuapp.com/g'
+];
 
 const corsOptions = {
   origin: function(origin, callback) {
