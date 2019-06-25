@@ -89,7 +89,7 @@ router.put('/:id', auth, async (req, res) => {
   const todoFields = {};
   if (header) todoFields.header = header;
   if (description) todoFields.description = description;
-  if (isCompleted) todoFields.isCompleted = isCompleted;
+  todoFields.isCompleted = isCompleted;
   if (purpose) todoFields.purpose = purpose;
   if (createDate) todoFields.createDate = createDate;
 
@@ -122,7 +122,7 @@ router.patch('/:id', auth, async (req, res) => {
   const todoFields = {};
   if (header) todoFields.header = header;
   if (description) todoFields.description = description;
-  if (isCompleted) todoFields.isCompleted = isCompleted;
+  todoFields.isCompleted = isCompleted;
   if (purpose) todoFields.purpose = purpose;
   if (createDate) todoFields.createDate = createDate;
 
