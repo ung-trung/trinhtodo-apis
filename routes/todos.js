@@ -21,6 +21,20 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// @route   GET api/todos/id
+// @desc    Get one todo
+// @access  Private
+router.get('/:id', auth, async (req, res) => {
+  try {
+    // @ts-ignore
+    const todos = await Todo.find({ user: req.user.id });
+    const todo = todos.find(today => todo._id === req.user.id);
+    res.json(todo);
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
 // @route   POST api/todos
 // @desc    Add new todo
 // @access  Private
@@ -70,6 +84,39 @@ router.post(
 // @desc    Update todo
 // @access  Private
 router.put('/:id', auth, async (req, res) => {
+  const { header, description, isCompleted, purpose, createDate } = req.body;
+
+  const todoFields = {};
+  if (header) todoFields.header = header;
+  if (description) todoFields.description = description;
+  if (isCompleted) todoFields.isCompleted = isCompleted;
+  if (purpose) todoFields.purpose = purpose;
+  if (createDate) todoFields.createDate = createDate;
+
+  try {
+    let todo = await Todo.findById(req.params.id);
+    if (!todo) return res.status(404).json({ msg: 'Todo not found' });
+
+    // Make sure owns todo
+    if (todo.user.toString() !== req.user.id) {
+      return res.status(401).json({ msg: 'Not authorized' });
+    }
+
+    todo = await Todo.findByIdAndUpdate(
+      req.params.id,
+      { $set: todoFields },
+      { new: true }
+    );
+
+    res.json(todo);
+  } catch (err) {
+    console.error(err.message);
+
+    res.status(500).send('Server Error');
+  }
+});
+
+router.patch('/:id', auth, async (req, res) => {
   const { header, description, isCompleted, purpose, createDate } = req.body;
 
   const todoFields = {};
