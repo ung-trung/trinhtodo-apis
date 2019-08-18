@@ -1,10 +1,9 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-const auth = require('../middleware/auth');
-const { check, validationResult } = require('express-validator');
-const User = require('../models/User');
-const Todo = require('../models/Todo');
+const auth = require('../middleware/auth')
+const { check, validationResult } = require('express-validator')
+const Todo = require('../models/Todo')
 
 // @route   GET api/todos
 // @desc    Get all todos
@@ -14,12 +13,12 @@ router.get('/', auth, async (req, res) => {
     // @ts-ignore
     const todos = await Todo.find({ user: req.user.id }).sort({
       date: -1
-    });
-    res.json(todos);
+    })
+    res.json(todos)
   } catch (err) {
-    res.status(500).send('Server Error');
+    res.status(500).send('Server Error')
   }
-});
+})
 
 // @route   GET api/todos/id
 // @desc    Get one todo
@@ -27,13 +26,13 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     // @ts-ignore
-    const todos = await Todo.find({ user: req.user.id });
-    const todo = todos.find(today => todo._id === req.user.id);
-    res.json(todo);
+    const todos = await Todo.find({ user: req.user.id })
+    const todo = todos.find(today => todo._id === req.user.id)
+    res.json(todo)
   } catch (err) {
-    res.status(500).send('Server Error');
+    res.status(500).send('Server Error')
   }
-});
+})
 
 // @route   POST api/todos
 // @desc    Add new todo
@@ -53,15 +52,25 @@ router.post(
       .isEmpty(),
     check('isCompleted', 'isCompleted is required')
       .not()
+      .isEmpty(),
+    check('mustBeCompleted', 'mustBeCompleted is required')
+      .not()
       .isEmpty()
   ],
   async (req, res) => {
-    const errors = validationResult(req);
+    const errors = validationResult(req)
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() })
     }
 
-    const { header, description, isCompleted, purpose, createDate } = req.body;
+    const {
+      header,
+      description,
+      isCompleted,
+      purpose,
+      createDate,
+      mustBeCompleted
+    } = req.body
 
     try {
       const newTodo = new Todo({
@@ -70,105 +79,122 @@ router.post(
         isCompleted,
         purpose,
         createDate,
+        mustBeCompleted,
         user: req.user.id
-      });
-      const todo = await newTodo.save();
-      res.json(todo);
+      })
+      const todo = await newTodo.save()
+      res.json(todo)
     } catch (error) {
-      res.status(500).send('Server Error');
+      res.status(500).send('Server Error')
     }
   }
-);
+)
 
 // @route   PUT api/todos/:id
 // @desc    Update todo
 // @access  Private
 router.put('/:id', auth, async (req, res) => {
-  const { header, description, isCompleted, purpose, createDate } = req.body;
+  const {
+    header,
+    description,
+    isCompleted,
+    purpose,
+    createDate,
+    mustBeCompleted
+  } = req.body
 
-  const todoFields = {};
-  if (header) todoFields.header = header;
-  if (description) todoFields.description = description;
-  todoFields.isCompleted = isCompleted;
-  if (purpose) todoFields.purpose = purpose;
-  if (createDate) todoFields.createDate = createDate;
+  const todoFields = {}
+  if (header) todoFields.header = header
+  if (description) todoFields.description = description
+  todoFields.isCompleted = isCompleted
+  if (purpose) todoFields.purpose = purpose
+  if (createDate) todoFields.createDate = createDate
+  todoFields.mustBeCompleted = mustBeCompleted
 
   try {
-    let todo = await Todo.findById(req.params.id);
-    if (!todo) return res.status(404).json({ msg: 'Todo not found' });
+    let todo = await Todo.findById(req.params.id)
+    if (!todo) return res.status(404).json({ msg: 'Todo not found' })
 
     // Make sure owns todo
     if (todo.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized' });
+      return res.status(401).json({ msg: 'Not authorized' })
     }
 
     todo = await Todo.findByIdAndUpdate(
       req.params.id,
       { $set: todoFields },
       { new: true }
-    );
+    )
 
-    res.json(todo);
+    res.json(todo)
   } catch (err) {
-    console.error(err.message);
+    console.error(err.message)
 
-    res.status(500).send('Server Error');
+    res.status(500).send('Server Error')
   }
-});
+})
 
 router.patch('/:id', auth, async (req, res) => {
-  const { header, description, isCompleted, purpose, createDate } = req.body;
+  const {
+    header,
+    description,
+    isCompleted,
+    purpose,
+    createDate,
+    mustBeCompleted
+  } = req.body
 
-  const todoFields = {};
-  if (header) todoFields.header = header;
-  if (description) todoFields.description = description;
-  todoFields.isCompleted = isCompleted;
-  if (purpose) todoFields.purpose = purpose;
-  if (createDate) todoFields.createDate = createDate;
+  const todoFields = {}
+  if (header) todoFields.header = header
+  if (description) todoFields.description = description
+  todoFields.isCompleted = isCompleted
+  if (purpose) todoFields.purpose = purpose
+  if (createDate) todoFields.createDate = createDate
+  todoFields.mustBeCompleted = mustBeCompleted
 
   try {
-    let todo = await Todo.findById(req.params.id);
-    if (!todo) return res.status(404).json({ msg: 'Todo not found' });
+    let todo = await Todo.findById(req.params.id)
+    if (!todo) return res.status(404).json({ msg: 'Todo not found' })
 
     // Make sure owns todo
     if (todo.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized' });
+      return res.status(401).json({ msg: 'Not authorized' })
     }
 
     todo = await Todo.findByIdAndUpdate(
       req.params.id,
       { $set: todoFields },
       { new: true }
-    );
+    )
 
-    res.json(todo);
+    res.json(todo)
   } catch (err) {
-    console.error(err.message);
+    console.error(err.message)
 
-    res.status(500).send('Server Error');
+    res.status(500).send('Server Error')
   }
-});
+})
 
 // @route   DELETE api/todos
 // @desc    DELETE a todo
 // @access  Private
 router.delete('/:id', auth, async (req, res) => {
   try {
-    let todo = await Todo.findById(req.params.id);
-    if (!todo) return res.status(404).json({ msg: 'Todo not found' });
+    let todo = await Todo.findById(req.params.id)
+    if (!todo) return res.status(404).json({ msg: 'Todo not found' })
 
     // Make sure owns todo
 
     if (todo.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized' });
+      return res.status(401).json({ msg: 'Not authorized' })
     }
 
-    await Todo.findByIdAndRemove(req.params.id);
-    res.json('Todo removed');
+    await Todo.findByIdAndRemove(req.params.id)
+    res.json('Todo removed')
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error(err.message)
+    res.status(500).send('Server Error')
   }
-});
+})
 
-module.exports = router;
+module.exports = router
