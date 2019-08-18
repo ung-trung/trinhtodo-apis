@@ -27,6 +27,10 @@ const TodoSchema = new mongoose.Schema({
   mustBeCompleted: {
     type: Boolean,
     default: false
+  },
+  isImportant: {
+    type: Boolean,
+    default: false
   }
 })
 

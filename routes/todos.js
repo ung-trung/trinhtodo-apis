@@ -55,6 +55,9 @@ router.post(
       .isEmpty(),
     check('mustBeCompleted', 'mustBeCompleted is required')
       .not()
+      .isEmpty(),
+    check('isImportant', 'isImportant is required')
+      .not()
       .isEmpty()
   ],
   async (req, res) => {
@@ -69,7 +72,8 @@ router.post(
       isCompleted,
       purpose,
       createDate,
-      mustBeCompleted
+      mustBeCompleted,
+      isImportant
     } = req.body
 
     try {
@@ -80,6 +84,7 @@ router.post(
         purpose,
         createDate,
         mustBeCompleted,
+        isImportant,
         user: req.user.id
       })
       const todo = await newTodo.save()
@@ -100,7 +105,8 @@ router.put('/:id', auth, async (req, res) => {
     isCompleted,
     purpose,
     createDate,
-    mustBeCompleted
+    mustBeCompleted,
+    isImportant
   } = req.body
 
   const todoFields = {}
@@ -110,6 +116,7 @@ router.put('/:id', auth, async (req, res) => {
   if (purpose) todoFields.purpose = purpose
   if (createDate) todoFields.createDate = createDate
   todoFields.mustBeCompleted = mustBeCompleted
+  todoFields.isImportant = isImportant
 
   try {
     let todo = await Todo.findById(req.params.id)
@@ -141,7 +148,8 @@ router.patch('/:id', auth, async (req, res) => {
     isCompleted,
     purpose,
     createDate,
-    mustBeCompleted
+    mustBeCompleted,
+    isImportant
   } = req.body
 
   const todoFields = {}
@@ -151,6 +159,7 @@ router.patch('/:id', auth, async (req, res) => {
   if (purpose) todoFields.purpose = purpose
   if (createDate) todoFields.createDate = createDate
   todoFields.mustBeCompleted = mustBeCompleted
+  todoFields.isImportant = isImportant
 
   try {
     let todo = await Todo.findById(req.params.id)
