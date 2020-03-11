@@ -101,4 +101,13 @@ router.get('/get-by-term/:term', auth, async (req, res) => {
   }
 })
 
+router.get('/get-by-term', auth, async (req, res) => {
+  try {
+    const users = await User.find()
+    res.json(users)
+  } catch (err) {
+    res.status(500).send('Server Error')
+  }
+})
+
 module.exports = router
