@@ -85,13 +85,16 @@ router.post(
 // @access   Public
 
 router.get('/get-by-term/:term', auth, async (req, res) => {
-  const termRegex = new RegExp(req.params.term, 'i')
+  const decodeTerm = decodeURI(req.params.term)
+  const termRegex = new RegExp(decodeTerm, 'i')
   try {
-    const users = await User.find().or([
-      { firstName: termRegex },
-      { email: termRegex },
-      { lastName: termRegex }
-    ])
+    const users = req.params.term
+      ? await User.find().or([
+          { firstName: termRegex },
+          { email: termRegex },
+          { lastName: termRegex }
+        ])
+      : await User.find()
     res.json(users)
   } catch (err) {
     res.status(500).send('Server Error')
