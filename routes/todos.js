@@ -11,9 +11,11 @@ const Todo = require('../models/Todo')
 router.get('/', auth, async (req, res) => {
   try {
     // @ts-ignore
-    const todos = await Todo.find({ user: req.user.id }).sort({
-      date: -1
-    })
+    const todos = await Todo.find()
+      .or([{ user: req.user.id }, { subUsers: req.user.id }])
+      .sort({
+        date: -1
+      })
     res.json(todos)
   } catch (err) {
     res.status(500).send('Server Error')
@@ -25,9 +27,13 @@ router.get('/', auth, async (req, res) => {
 // @access  Private
 router.get('/:id', auth, async (req, res) => {
   try {
-    // @ts-ignore
-    const todos = await Todo.find({ user: req.user.id })
-    const todo = todos.find(today => todo._id === req.user.id)
+    const todos = await Todo.find().or([
+      // @ts-ignore
+      { user: req.user.id },
+      // @ts-ignore
+      { subUsers: req.user.id }
+    ])
+    const todo = todos.find(todo => todo._id === req.params.id)
     res.json(todo)
   } catch (err) {
     res.status(500).send('Server Error')
@@ -73,7 +79,8 @@ router.post(
       purpose,
       createDate,
       mustBeCompleted,
-      isImportant
+      isImportant,
+      subUsers
     } = req.body
 
     try {
@@ -85,6 +92,8 @@ router.post(
         createDate,
         mustBeCompleted,
         isImportant,
+        subUsers,
+
         user: req.user.id
       })
       const todo = await newTodo.save()
@@ -106,24 +115,30 @@ router.put('/:id', auth, async (req, res) => {
     purpose,
     createDate,
     mustBeCompleted,
+    subUsers,
     isImportant
   } = req.body
 
   const todoFields = {}
   if (header) todoFields.header = header
   if (description) todoFields.description = description
-  todoFields.isCompleted = isCompleted
+  if (typeof isCompleted !== 'undefined') todoFields.isCompleted = isCompleted
   if (purpose) todoFields.purpose = purpose
   if (createDate) todoFields.createDate = createDate
-  todoFields.mustBeCompleted = mustBeCompleted
-  todoFields.isImportant = isImportant
+  if (subUsers) todoFields.subUsers = subUsers
+  if (typeof mustBeCompleted !== 'undefined')
+    todoFields.mustBeCompleted = mustBeCompleted
+  if (typeof isImportant !== 'undefined') todoFields.isImportant = isImportant
 
   try {
     let todo = await Todo.findById(req.params.id)
     if (!todo) return res.status(404).json({ msg: 'Todo not found' })
 
     // Make sure owns todo
-    if (todo.user.toString() !== req.user.id) {
+    if (
+      todo.user.toString() !== req.user.id &&
+      todo.subUsers.every(user => user.toString() !== req.user.id)
+    ) {
       return res.status(401).json({ msg: 'Not authorized' })
     }
 
@@ -149,24 +164,30 @@ router.patch('/:id', auth, async (req, res) => {
     purpose,
     createDate,
     mustBeCompleted,
-    isImportant
+    isImportant,
+    subUsers
   } = req.body
 
   const todoFields = {}
   if (header) todoFields.header = header
   if (description) todoFields.description = description
-  todoFields.isCompleted = isCompleted
+  if (typeof isCompleted !== 'undefined') todoFields.isCompleted = isCompleted
   if (purpose) todoFields.purpose = purpose
   if (createDate) todoFields.createDate = createDate
-  todoFields.mustBeCompleted = mustBeCompleted
-  todoFields.isImportant = isImportant
+  if (subUsers) todoFields.subUsers = subUsers
+  if (typeof mustBeCompleted !== 'undefined')
+    todoFields.mustBeCompleted = mustBeCompleted
+  if (typeof isImportant !== 'undefined') todoFields.isImportant = isImportant
 
   try {
     let todo = await Todo.findById(req.params.id)
     if (!todo) return res.status(404).json({ msg: 'Todo not found' })
 
     // Make sure owns todo
-    if (todo.user.toString() !== req.user.id) {
+    if (
+      todo.user.toString() !== req.user.id &&
+      todo.subUsers.every(user => user.toString() !== req.user.id)
+    ) {
       return res.status(401).json({ msg: 'Not authorized' })
     }
 
@@ -194,7 +215,10 @@ router.delete('/:id', auth, async (req, res) => {
 
     // Make sure owns todo
 
-    if (todo.user.toString() !== req.user.id) {
+    if (
+      todo.user.toString() !== req.user.id &&
+      todo.subUsers.every(user => user.toString() !== req.user.id)
+    ) {
       return res.status(401).json({ msg: 'Not authorized' })
     }
 

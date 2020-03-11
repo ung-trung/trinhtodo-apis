@@ -5,6 +5,12 @@ const TodoSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users'
   },
+  subUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'users'
+    }
+  ],
   header: {
     type: String,
     required: true

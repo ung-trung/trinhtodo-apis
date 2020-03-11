@@ -1,11 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const config = require('config');
-const { check, validationResult } = require('express-validator');
-
-const User = require('../models/User');
+const express = require('express')
+const router = express.Router()
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const config = require('config')
+const { check, validationResult } = require('express-validator')
+const auth = require('../middleware/auth')
+const User = require('../models/User')
 
 // @route    POST api/users
 // @desc     Register user
@@ -29,18 +29,18 @@ router.post(
     ).isLength({ min: 6 })
   ],
   async (req, res) => {
-    const errors = validationResult(req);
+    const errors = validationResult(req)
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() })
     }
 
-    const { firstName, lastName, username, email, password } = req.body;
+    const { firstName, lastName, username, email, password } = req.body
 
     try {
-      let user = await User.findOne({ email });
+      let user = await User.findOne({ email })
 
       if (user) {
-        return res.status(400).json({ msg: 'User already exists' });
+        return res.status(400).json({ msg: 'User already exists' })
       }
 
       user = new User({
@@ -49,35 +49,53 @@ router.post(
         username,
         email,
         password
-      });
+      })
 
-      const salt = await bcrypt.genSalt(10);
+      const salt = await bcrypt.genSalt(10)
 
       // @ts-ignore
-      user.password = await bcrypt.hash(password, salt);
+      user.password = await bcrypt.hash(password, salt)
 
-      await user.save();
+      await user.save()
 
       const payload = {
         user: {
           id: user.id
         }
-      };
+      }
 
       jwt.sign(
         payload,
         config.get('jwtSecret'),
         { expiresIn: 360000 },
         (err, token) => {
-          if (err) throw err;
-          res.json({ token });
+          if (err) throw err
+          res.json({ token })
         }
-      );
+      )
     } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
+      console.error(err.message)
+      res.status(500).send('Server error')
     }
   }
-);
+)
 
-module.exports = router;
+// @route    Get api/users
+// @desc     Get user by name
+// @access   Public
+
+router.get('/get-by-term/:term', auth, async (req, res) => {
+  const termRegex = new RegExp(req.params.term, 'i')
+  try {
+    const users = await User.find().or([
+      { firstName: termRegex },
+      { email: termRegex },
+      { lastName: termRegex }
+    ])
+    res.json(users)
+  } catch (err) {
+    res.status(500).send('Server Error')
+  }
+})
+
+module.exports = router
