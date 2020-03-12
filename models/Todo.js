@@ -3,12 +3,12 @@ const mongoose = require('mongoose')
 const TodoSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'users'
+    ref: 'user'
   },
   subUsers: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'users'
+      ref: 'user'
     }
   ],
   header: {
