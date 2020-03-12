@@ -89,9 +89,9 @@ router.get('/get-by-term/:term', auth, async (req, res) => {
   const termRegex = new RegExp(decodeTerm, 'i')
   try {
     const users = req.params.term
-      ? await User.find().or([
+      ? await User.find({}, 'firstName lastName username id').or([
           { firstName: termRegex },
-          { email: termRegex },
+          { username: termRegex },
           { lastName: termRegex }
         ])
       : await User.find()
@@ -103,7 +103,7 @@ router.get('/get-by-term/:term', auth, async (req, res) => {
 
 router.get('/get-by-term', auth, async (req, res) => {
   try {
-    const users = await User.find()
+    const users = await User.find({}, 'firstName lastName username id')
     res.json(users)
   } catch (err) {
     res.status(500).send('Server Error')
