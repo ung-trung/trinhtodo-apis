@@ -10,9 +10,10 @@ const Todo = require('../models/Todo')
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
-    // @ts-ignore
     const todos = await Todo.find()
+      // @ts-ignore
       .or([{ user: req.user.id }, { subUsers: req.user.id }])
+      .populate('subUsers', 'firstName lastName username')
       .sort({
         date: -1
       })
@@ -25,6 +26,7 @@ router.get('/', auth, async (req, res) => {
 // @route   GET api/todos/id
 // @desc    Get one todo
 // @access  Private
+// not in use
 router.get('/:id', auth, async (req, res) => {
   try {
     const todos = await Todo.find().or([
