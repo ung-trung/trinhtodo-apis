@@ -14,6 +14,7 @@ router.get('/', auth, async (req, res) => {
       // @ts-ignore
       .or([{ user: req.user.id }, { subUsers: req.user.id }])
       .populate('subUsers', 'firstName lastName username')
+      .populate('user', 'firstName lastName username')
       .sort({
         date: -1
       })
